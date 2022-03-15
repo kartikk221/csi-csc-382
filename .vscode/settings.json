@@ -1,4 +1,5 @@
 {
+    "clang-format.executable": "clang-format",
     "files.associations": {
         "*.cpp": "cpp",
         "atomic": "cpp",

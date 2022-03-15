@@ -6,6 +6,7 @@
  * algorithm.
  */
 
+#include <iomanip>
 #include <iostream>
 #include <random>
 #include <time.h>
@@ -13,9 +14,6 @@ using namespace std;
 
 // Generates a random integer between provided min and max values
 int random_integer(int min, int max) {
-  // Seed the random number generator
-  srand(time(NULL));
-
   // Generate a random number between min and max
   return min + rand() % (max - min + 1);
 }
@@ -25,7 +23,7 @@ int A5_Find(int x, int A[], int n) {
   int j;
   for (j = 0; j < n; j++) {
     if (x == A[j]) {
-      return (j + 1); // The position is 1 more than index
+      return j + 1; // The steps are 1 more than index
     }
   }
   return 0; // x is not an element of the array
@@ -41,6 +39,7 @@ void perform_average_scenarios(int bound) {
 
   // 1.d) Let hits = 0.
   int hits = 0;
+  int total_steps = 0;
 
   // 1.g) Repeat steps e and f 10,000 times (in other words create 10,000
   // sequences of 50 integers each. Clearly Sequences is a 50 x 10,000
@@ -57,47 +56,48 @@ void perform_average_scenarios(int bound) {
     // increment hits by one (if x appears more than once do not increment hits
     // every time).
     for (int j = 0; j < n; j++) {
-      bool is_repeating = Sequences[i][j] == Sequences[i][j + 1];
-      if (!is_repeating && x == Sequences[i][j]) {
+      bool is_double = Sequences[i][j] == Sequences[i][j + 1];
+      if (!is_double && Sequences[i][j] == x) {
         hits++;
       }
     }
+
+    // Calculate the total steps
+    total_steps += A5_Find(x, Sequences[i], n);
   }
 
   // 1.h) Let q = hits / 10,000.
-  int q = hits / iterations;
+  double q = hits / iterations;
 
-  // 1.i) Let calculated_average = A5_Find(x, Sequences, n).
-  int calculated_average = A5_Find(x, *Sequences, n);
+  // 1.i) Let calculated_average -> AI(n) = ((h^2)/4) + (3/4)(n) where h is
+  // bound
+  double calculated_average = ((bound * bound) / 4) + (3 * n / 4);
 
-  // 2) Real Average
-  // Let total-steps be a variable that tells you the total number of steps
-  // executed so far, that is, initialize total-steps to zero
-  int total_steps = 0;
+  // Calculate the real average
+  double real_average = total_steps / iterations;
 
-  // Using the sequences created in the previous step (two-dimensional array
-  // Sequences) run algorithm A5 10,000 times using each time an input of
-  // Sequences
-  for (int i = 0; i < iterations; i++) {
-    // 2.a) Let x be an integer between 0 and bound.
-    x = random_integer(0, bound);
+  // Set the print number decimal precision to 2 decimal places
+  cout << setprecision(2) << fixed;
 
-    // 2.b) Let total-steps = total-steps + A5_Find(x, Sequences, n).
-    total_steps += A5_Find(x, *Sequences, n);
-  }
+  // Print the results for this bound
+  cout << bound << setw(30) << calculated_average << setw(30) << real_average
+       << endl;
 }
 
 int main() {
   // Log the information columns with a border line
-  cout << "Bound		Calculated Average		Real Average"
+  cout << "Bound" << setw(30) << "Calculated Average" << setw(30)
+       << "Real Average" << endl;
+
+  // Print the border line
+  cout << "-----------------------------------------------------------------"
        << endl;
-  cout << "--------------------------------------------------------------------"
-          "----"
-       << endl;
-  return 0;
+
+  // Seed the random number generator
+  srand(time(NULL));
 
   // Run steps 1-2 for the following bound values
-  int bounds[] = {30, 50, 80, 100, 1000, 10000};
+  int bounds[] = {30, 50, 80, 100, 1000, 10000, INFINITY};
   for (int i = 0; i < *(&bounds + 1) - bounds; i++) {
     perform_average_scenarios(bounds[i]);
   }
