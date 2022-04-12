@@ -33,7 +33,7 @@ int InsertionMod(int A[], int n) {
   return steps;
 }
 
-const int n = 100; // 1.a) Let n = 50
+const int n = 100; // 1.a) Let n = 100
 const int iterations = 100000;
 
 void perform_average_scenarios(int bound) {
@@ -84,3 +84,14 @@ int main() {
 
   return 0;
 }
+
+/**
+ * @brief The output of the program displays that the calculated average remains
+ * the same at 2575 steps for all bounds. With this in mind, the real average
+ * tends to follow very close to the 2575 steps while increasing in accuracy as
+ * the bounds increase. This proves that the mod insertion's average case is
+ * validated through both the calculated and real average over 100,000
+ * iterations with increasing range of numbers in both negative and positive
+ * domains.
+ *
+ */
