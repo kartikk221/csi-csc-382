@@ -18,7 +18,7 @@ int InsertionMod(int A[], int n) {
   int steps = 0;
   int i, j, temp;
   A[0] =
-      -32768; // smallest possible integer using 2 bytes integer representation
+      INT_MIN; // smallest possible integer using 2 bytes integer representation
   for (i = 1; i <= n; i++) {
     j = i;
     while (A[j] < A[j - 1]) { // swap
