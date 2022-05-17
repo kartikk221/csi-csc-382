@@ -20,10 +20,13 @@ struct Node {
 // Define a class to represent a graph
 class Graph {
 private:
+  Node *roots;  // Array of roots
   int vertices; // Number of vertices in the graph
   int edges;    // Number of edges in the graph
-  Node *roots;  // Array of roots (heads) of the linked lists
 public:
+  bool cycles = false; // Flag to indicate if the graph contains a cycle
+  bool *tracking;      // Array to keep track of visited nodes
+
   // Constructor to initialize the graph
   Graph(int vertices) {
     // Initialize the number of vertices and edges
@@ -35,6 +38,12 @@ public:
     for (int i = 0; i < vertices; i++) {
       this->roots[i].next = 0;
       this->roots[i].value = i;
+    }
+
+    // Initialize the tracking array
+    tracking = new bool[vertices];
+    for (int i = 0; i < vertices; i++) {
+      tracking[i] = false;
     }
   }
 
@@ -70,33 +79,69 @@ public:
     this->roots[from].next = node;
   }
 
-  // This method will print the graph
-  // Follows directions from professor in format "Cycle: (0,1), (1,2), (2,3),
-  // (3,0)"
-  void Print() {
-    // Print the beginning of the cycle
-    cout << "Cycle:";
-
-    // Loop through the linked lists
-    int cursor = 0;
+  // Prints any cycles in the graph in the format "Cycle: (0, 1), (1, 2), (2,
+  // 3), (3, 0)"
+  void PrintCycles() {
+    // Iterate through the roots
     for (int i = 0; i < this->vertices; i++) {
-      // Retrieve the head of the linked list
-      Node *node = this->roots[i].next;
+      // Iterate through the linked list of the root
+      Node current = this->roots[i];
+      Node *node = current.next;
+      while (node) {
+        // If the node is the same as the root, then a cycle has been found
+        if (node->value == current.value) {
+          // Set the flag to indicate a cycle has been found
+          this->cycles = true;
 
-      // Loop through the linked list
-      while (node != 0) {
-        // Print a comma if the node is not the last in the list
-        if (cursor > 0) {
-          cout << ",";
+          // Print the cycle
+          cout << "Cycle: ";
+          Node *temp = node;
+          while (temp != 0) {
+            cout << "(" << temp->value << ", ";
+            temp = temp->next;
+          }
+          cout << i << ")" << endl;
         }
-
-        // Print the edge
-        cout << " (" << i << ", " << node->value << ")";
-
-        // Increment the cursor
-        cursor++;
+        node = node->next;
       }
     }
+  }
+
+  // This method will perform a depth first search on the graph
+  void DFS(int root) {
+    // Set the node as visited
+    this->tracking[root] = true;
+
+    // Iterate through the linked list of the root
+    Node current = this->roots[root];
+    Node *node = current.next;
+    while (node) {
+      // If the node has not been visited, then perform a depth first search
+      if (!this->tracking[node->value]) {
+        // Perform a depth first search on the node
+        this->DFS(node->value);
+      }
+      node = node->next;
+    }
+  }
+
+  // This methods will return the number of connected components in the graph
+  int GetConnections() {
+    // Initialize the number of connected components
+    int connections = 0;
+
+    // Iterate through the roots
+    for (int i = 0; i < this->vertices; i++) {
+      // If the root has not been visited, then increment the number of
+      // connected components
+      if (!this->tracking[i]) {
+        connections++;
+        this->DFS(i);
+      }
+    }
+
+    // Return the number of connected components
+    return connections;
   }
 };
 
@@ -109,9 +154,19 @@ int main() {
   // Create a graph with the number of vertices
   Graph *graph = new Graph(vertices);
 
-  // Create and print the graph back to the user
+  // Create, Print and Generate Insights for the graph
   graph->Creates();
-  graph->Print();
+  graph->PrintCycles();
+
+  // Print the number of connected components
+  cout << "Number of connected components: " << graph->GetConnections() << endl;
+
+  // Print whether this graph contains a cycle
+  if (graph->cycles) {
+    cout << "This Graph Contains A Cycle!" << endl;
+  } else {
+    cout << "This Graph Does NOT Contain A Cycle." << endl;
+  }
 
   return 0;
 }
